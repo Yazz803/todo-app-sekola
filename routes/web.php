@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\TodoController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,8 +22,13 @@ Route::get('/register', [RegisterController::class, 'index'])->name('register.in
 Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
-Route::get('/dashboard', function () {
-    return view('dashboard.home', [
-        'title' => 'Dashboard'
-    ]);
-})->middleware('isLogin')->name('dashboard.home');
+Route::group(['middleware' => 'isLogin'], function () {
+    // Route::resource('/todo', TodoController::class);
+    Route::get('/dashboard', [TodoController::class, 'index'])->name('dashboard.index');
+    Route::get('/dashboard/create', [TodoController::class, 'create'])->name('dashboard.create');
+    Route::post('/dashboard', [TodoController::class, 'store'])->name('dashboard.store');
+    Route::delete('/dashboard/{todo:id}', [TodoController::class, 'destroy'])->name('dashboard.destroy');
+    Route::put('/dashboard/{todo:id}', [TodoController::class, 'update'])->name('dashboard.update');
+    Route::put('/dashboard/update/{todo:id}', [TodoController::class, 'updateStatus'])->name('dashboard.updateStatus');
+    Route::get('/dashboard/edit/{todo:id}', [TodoController::class, 'edit'])->name('dashboard.edit');
+});

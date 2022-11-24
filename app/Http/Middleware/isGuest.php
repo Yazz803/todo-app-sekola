@@ -20,7 +20,7 @@ class isGuest
     {
         if(Auth::check()){
             Alert::toast('Kamu Sudah Login!', 'warning');
-            return redirect()->route('dashboard.home');
+            return redirect()->route('todo.index');
         }
         return $next($request);
     }

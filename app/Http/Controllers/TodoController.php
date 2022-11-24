@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Todo;
 use Illuminate\Http\Request;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class TodoController extends Controller
 {
@@ -14,7 +15,9 @@ class TodoController extends Controller
      */
     public function index()
     {
-        //
+        return view('dashboard.home', [
+            'todos' => Todo::where('user_id', auth()->user()->id)->orderBy('created_at', 'desc')->get(),
+        ]);
     }
 
     /**
@@ -24,7 +27,7 @@ class TodoController extends Controller
      */
     public function create()
     {
-        //
+        return view('dashboard.create');
     }
 
     /**
@@ -35,7 +38,18 @@ class TodoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validateData = $request->validate([
+            'title' => 'required|min:3|max:100',
+            'date' => 'required',
+            'description' => 'required|min:3',
+        ]);
+
+        $validateData['user_id'] = auth()->user()->id;
+        $validateData['status'] = 0;
+
+        Todo::create($validateData);
+        Alert::toast('Berhasil Menambahkan Todo!', 'success');
+        return redirect()->route('dashboard.index');
     }
 
     /**
@@ -57,7 +71,9 @@ class TodoController extends Controller
      */
     public function edit(Todo $todo)
     {
-        //
+        return view('dashboard.edit', [
+            'todo' => $todo,
+        ]);
     }
 
     /**
@@ -69,7 +85,25 @@ class TodoController extends Controller
      */
     public function update(Request $request, Todo $todo)
     {
-        //
+        Todo::find($todo->id)->update([
+            'title' => $request->title,
+            'date' => $request->date,
+            'description' => $request->description
+        ]);
+
+        Alert::toast('Berhasil Menyelesaikan Todo!', 'success');
+        return redirect()->route('dashboard.index');
+    }
+    
+    public function updateStatus(Request $request, Todo $todo)
+    {
+        Todo::find($todo->id)->update([
+            'date_done' => now(),
+            'status' => 1
+        ]);
+
+        Alert::toast('Berhasil Menyelesaikan Todo!', 'success');
+        return redirect()->route('dashboard.index');
     }
 
     /**
@@ -80,6 +114,8 @@ class TodoController extends Controller
      */
     public function destroy(Todo $todo)
     {
-        //
+        Todo::where('id', $todo->id)->delete();
+        Alert::toast('Berhasil Menghapus Todo!', 'success');
+        return redirect()->route('dashboard.index');
     }
 }
